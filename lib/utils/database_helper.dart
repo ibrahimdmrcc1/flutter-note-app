@@ -7,7 +7,7 @@ import 'package:sqflite/sqflite.dart';
 
 class DatabaseHelper {
   static DatabaseHelper _databaseHelper;
-  static Database _database;
+  static Database _database; // in sqflite library
 
   factory DatabaseHelper() {
     if (_databaseHelper == null) {
@@ -30,8 +30,6 @@ class DatabaseHelper {
   }
 
   Future<Database> _initializeDatabase() async {
-    Database _db;
-
     var databasesPath = await getDatabasesPath();
     var path = join(databasesPath, "appDB.db");
 
@@ -68,8 +66,7 @@ class DatabaseHelper {
     return sonuc;
   }
 
- Future<List<Kategori>> kategoriListesiniGetir() async{
-
+  Future<List<Kategori>> kategoriListesiniGetir() async {
     var kategorileriIcerenMapListesi = await kategoriGetir();
     var kategoriListesi = List<Kategori>();
 
@@ -78,8 +75,8 @@ class DatabaseHelper {
     }
 
     return kategoriListesi;
+  }
 
- }
   Future<int> kategoriEkle(Kategori kategori) async {
     var db = await _getDatabase();
     var sonuc = await db.insert("kategori", kategori.toMap());
