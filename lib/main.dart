@@ -1,13 +1,16 @@
 import 'dart:io';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_note_app/bottomBar.dart';
 import 'package:flutter_note_app/kategori_islemleri.dart';
 import 'package:flutter_note_app/not_detay.dart';
+import 'package:flutter_note_app/responsive/size_config.dart';
+import 'package:flutter_note_app/styles.dart';
 import 'package:flutter_note_app/utils/database_helper.dart';
-
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'models/kategori_model.dart';
 import 'models/not_model.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 void main() {
   runApp(MyApp());
@@ -20,7 +23,7 @@ class MyApp extends StatelessWidget {
       title: 'Note Application',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        primarySwatch: Colors.red,
+        primarySwatch: createMaterialColor(Color(0xff5b8a72)),
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
       home: NotListesi(),
@@ -34,17 +37,22 @@ class NotListesi extends StatefulWidget {
 }
 
 class _NotListesiState extends State<NotListesi> {
-
   DatabaseHelper databaseHelper = DatabaseHelper();
   var _scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
   Widget build(BuildContext context) {
+    SizeConfig().init(context);
     return Scaffold(
+      backgroundColor: darkBackColor,
+      bottomNavigationBar: BottomNavyBar(),
       key: _scaffoldKey,
       appBar: AppBar(
         title: Center(
-          child: Text("Notlarım"),
+          child: Text(
+            "Notlarım",
+            style: h2Text,
+          ),
         ),
         actions: [
           PopupMenuButton(itemBuilder: (context) {
@@ -204,103 +212,174 @@ class _NotlarState extends State<Notlar> {
   @override
   // build o ekrana her geldiğinde çalışır
   Widget build(BuildContext context) {
-    return FutureBuilder(
-      future: databaseHelper.notListesiGetir(),
-      builder: (context, AsyncSnapshot<List<Not>> snapShot) {
-        if (snapShot.connectionState == ConnectionState.done) {
-          tumNotlar = snapShot.data;
-          sleep(Duration(microseconds: 1000));
-          return ListView.builder(
-              itemCount: tumNotlar.length,
-              itemBuilder: (context, index) {
-                return ExpansionTile(
-                  leading: _oncelikIconuAta(tumNotlar[index].notOncelik),
-                  title: Text(tumNotlar[index].notBaslik),
-                  children: [
-                    Container(
-                      padding: EdgeInsets.all(4),
-                      child: Column(
-                        //crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    SizeConfig().init(context);
+    return Column(
+      children: [
+        Container(
+          height: SizeConfig.blockSizeVertical * 8,
+          margin: EdgeInsets.symmetric(vertical: 7, horizontal: 16),
+          padding: EdgeInsets.symmetric(horizontal: 12),
+          decoration: BoxDecoration(
+              color: greyColor,
+              shape: BoxShape.rectangle,
+              borderRadius: BorderRadius.circular(8),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black38,
+                  offset: Offset(0.0, 1.0),
+                  blurRadius: 6,
+                )
+              ]),
+          child: TextField(
+            decoration: InputDecoration(
+              suffixIcon: Icon(Icons.search,color: Color(0x66ffffff)),
+                hintText: "Notlarda arayın",
+                hintStyle: body2,
+                focusedBorder: InputBorder.none,
+                enabledBorder: InputBorder.none,
+                disabledBorder: InputBorder.none,
+                prefixStyle: body2),
+          ),
+        ),
+        Expanded(
+          child: FutureBuilder(
+            future: databaseHelper.notListesiGetir(),
+            builder: (context, AsyncSnapshot<List<Not>> snapShot) {
+              if (snapShot.connectionState == ConnectionState.done) {
+                tumNotlar = snapShot.data;
+                sleep(Duration(microseconds: 1000));
+                return ListView.builder(
+                    itemCount: tumNotlar.length,
+                    itemBuilder: (context, index) {
+                      return ClipRRect(
+                        borderRadius: BorderRadius.circular(5.0),
+                        child: Container(
+                          padding: EdgeInsets.symmetric(horizontal: SizeConfig.blockSizeHorizontal*5),
+                          height: SizeConfig.blockSizeVertical * 20,
+                          margin:
+                              EdgeInsets.symmetric(vertical: 5, horizontal: 12),
+                          decoration: BoxDecoration(
+                              color: greyColor,
+                              shape: BoxShape.rectangle,
+                              borderRadius: BorderRadius.circular(8),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black38,
+                                  offset: Offset(0.0, 1.0),
+                                  blurRadius: 6,
+                                )
+                              ]),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Text(
-                                  "Kategori",
-                                  style: TextStyle(color: Colors.redAccent),
-                                ),
+                              Text(
+                                tumNotlar[index].notBaslik,
+                                style: h2Text,
                               ),
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Text(
-                                  tumNotlar[index].kategoriBaslik,
-                                  style: TextStyle(color: Colors.black),
-                                ),
-                              )
+                              Text(
+                                tumNotlar[index].notIcerik,
+                                style: body2,
+                              ),
                             ],
                           ),
-
-                          // olusturma tarihi iptall
-                          /*Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Text(
-                                  "Oluşturulma Tarihi",
-                                  style: TextStyle(color: Colors.redAccent),
-                                ),
-                              ),
-                              Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: FutureBuilder(
-                                    future: databaseHelper.date(
-                                         _tarihAyirFonksiyonu(
-                                            tumNotlar[index].notTarih)),
-                                    builder: Text(data),
-                                  ))
-                            ],
-                          ),*/
-                          Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Text(
-                              tumNotlar[index].notIcerik,
-                              style: TextStyle(fontSize: 18),
-                            ),
-                          ),
-                          ButtonBar(
-                            children: [
-                              FlatButton(
-                                  onPressed: () =>
-                                      _notSil(tumNotlar[index].notID),
-                                  child: Text("SİL")),
-                              FlatButton(
-                                  onPressed: () {
-                                    _detaySayfasinaGit(
-                                        context, tumNotlar[index]);
-                                  },
-                                  child: Text(
-                                    "DÜZENLE",
-                                    style: TextStyle(color: Colors.green),
-                                  )),
-                            ],
-                          )
-                        ],
-                      ),
-                    )
-                  ],
+                        ),
+                      );
+                    });
+              } else {
+                return Center(
+                  child: Text("Yükleniyor..."),
                 );
-              });
-        } else {
-          return Center(
-            child: Text("Yükleniyor..."),
-          );
-        }
-      },
+              }
+            },
+          ),
+        ),
+      ],
     );
   }
+
+  //ExpansionTile(
+  //                         leading: _oncelikIconuAta(tumNotlar[index].notOncelik),
+  //                         title: Text(
+  //                           tumNotlar[index].notBaslik,style: body2,
+  //                         ),
+  //                         children: [
+  //                           Container(
+  //                             padding: EdgeInsets.all(4),
+  //                             child: Column(
+  //                               //crossAxisAlignment: CrossAxisAlignment.stretch,
+  //                               children: [
+  //                                 Row(
+  //                                   mainAxisAlignment:
+  //                                       MainAxisAlignment.spaceBetween,
+  //                                   children: [
+  //                                     Padding(
+  //                                       padding: const EdgeInsets.all(8.0),
+  //                                       child: Text(
+  //                                         "Kategori",
+  //                                         style:
+  //                                             TextStyle(color: Colors.redAccent),
+  //                                       ),
+  //                                     ),
+  //                                     Padding(
+  //                                       padding: const EdgeInsets.all(8.0),
+  //                                       child: Text(
+  //                                         tumNotlar[index].kategoriBaslik,
+  //                                         style: TextStyle(color: Colors.black),
+  //                                       ),
+  //                                     )
+  //                                   ],
+  //                                 ),
+  //
+  //                                 // olusturma tarihi iptall
+  //                                 /*Row(
+  //                                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  //                                   children: [
+  //                                     Padding(
+  //                                       padding: const EdgeInsets.all(8.0),
+  //                                       child: Text(
+  //                                         "Oluşturulma Tarihi",
+  //                                         style: TextStyle(color: Colors.redAccent),
+  //                                       ),
+  //                                     ),
+  //                                     Padding(
+  //                                         padding: const EdgeInsets.all(8.0),
+  //                                         child: FutureBuilder(
+  //                                           future: databaseHelper.date(
+  //                                                _tarihAyirFonksiyonu(
+  //                                                   tumNotlar[index].notTarih)),
+  //                                           builder: Text(data),
+  //                                         ))
+  //                                   ],
+  //                                 ),*/
+  //                                 Padding(
+  //                                   padding: const EdgeInsets.all(8.0),
+  //                                   child: Text(
+  //                                     tumNotlar[index].notIcerik,
+  //                                     style: TextStyle(fontSize: 18),
+  //                                   ),
+  //                                 ),
+  //                                 ButtonBar(
+  //                                   children: [
+  //                                     FlatButton(
+  //                                         onPressed: () =>
+  //                                             _notSil(tumNotlar[index].notID),
+  //                                         child: Text("SİL")),
+  //                                     FlatButton(
+  //                                         onPressed: () {
+  //                                           _detaySayfasinaGit(
+  //                                               context, tumNotlar[index]);
+  //                                         },
+  //                                         child: Text(
+  //                                           "DÜZENLE",
+  //                                           style: TextStyle(color: Colors.green),
+  //                                         )),
+  //                                   ],
+  //                                 )
+  //                               ],
+  //                             ),
+  //                           )
+  //                         ],
+  //                       )
 
   _detaySayfasinaGit(BuildContext context, Not not) {
     Navigator.push(
