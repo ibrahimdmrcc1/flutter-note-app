@@ -1,4 +1,4 @@
-# flutter_note_app
+# Simple Note Application with Flutter
 
 A new Flutter application.
 

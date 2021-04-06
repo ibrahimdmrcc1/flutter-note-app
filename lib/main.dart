@@ -37,6 +37,11 @@ class NotListesi extends StatefulWidget {
 }
 
 class _NotListesiState extends State<NotListesi> {
+<<<<<<< HEAD
+=======
+
+
+>>>>>>> a8ef696dbd828358b42323b3059f7561fa6d538e
   DatabaseHelper databaseHelper = DatabaseHelper();
   var _scaffoldKey = GlobalKey<ScaffoldState>();
 
