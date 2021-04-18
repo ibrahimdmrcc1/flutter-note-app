@@ -2,15 +2,14 @@ import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_note_app/bottomBar.dart';
-import 'package:flutter_note_app/kategori_islemleri.dart';
-import 'package:flutter_note_app/not_detay.dart';
+import 'package:flutter_note_app/main_screen.dart';
 import 'package:flutter_note_app/responsive/size_config.dart';
 import 'package:flutter_note_app/styles.dart';
 import 'package:flutter_note_app/utils/database_helper.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'kategori_islemleri.dart';
 import 'models/kategori_model.dart';
 import 'models/not_model.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 void main() {
   runApp(MyApp());
@@ -23,10 +22,10 @@ class MyApp extends StatelessWidget {
       title: 'Note Application',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        primarySwatch: createMaterialColor(Color(0xff5b8a72)),
+        primarySwatch: createMaterialColor(materialColor),
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      home: NotListesi(),
+      home: MainScreen(),
     );
   }
 }
@@ -37,11 +36,6 @@ class NotListesi extends StatefulWidget {
 }
 
 class _NotListesiState extends State<NotListesi> {
-<<<<<<< HEAD
-=======
-
-
->>>>>>> a8ef696dbd828358b42323b3059f7561fa6d538e
   DatabaseHelper databaseHelper = DatabaseHelper();
   var _scaffoldKey = GlobalKey<ScaffoldState>();
 
@@ -49,10 +43,11 @@ class _NotListesiState extends State<NotListesi> {
   Widget build(BuildContext context) {
     SizeConfig().init(context);
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       backgroundColor: darkBackColor,
-      bottomNavigationBar: BottomNavyBar(),
+      //bottomNavigationBar: BottomNavyBar(),
       key: _scaffoldKey,
-      appBar: AppBar(
+      /* appBar: AppBar(
         title: Center(
           child: Text(
             "Notlarım",
@@ -75,8 +70,8 @@ class _NotListesiState extends State<NotListesi> {
             ];
           }),
         ],
-      ),
-      floatingActionButton: Column(
+      ),*/
+      /*floatingActionButton: Column(
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
           FloatingActionButton(
@@ -99,7 +94,7 @@ class _NotListesiState extends State<NotListesi> {
             child: Icon(Icons.add),
           ),
         ],
-      ),
+      ),*/
       body: Notlar(),
     );
   }
@@ -181,14 +176,14 @@ class _NotListesiState extends State<NotListesi> {
         });
   }
 
-  _detaySayfasinaGit(BuildContext context) {
+/*  _detaySayfasinaGit(BuildContext context) {
     Navigator.push(
         context,
         MaterialPageRoute(
             builder: (context) => NotDetay(
                   baslik: "Yeni Not",
                 ))).then((value) => setState(() {}));
-  }
+  }*/
 
   _kategorilerSayfasinaGit(BuildContext context) {
     Navigator.of(context)
@@ -205,6 +200,9 @@ class Notlar extends StatefulWidget {
 class _NotlarState extends State<Notlar> {
   List<Not> tumNotlar;
   DatabaseHelper databaseHelper;
+  double _width = 100;
+  double _height = 50;
+  bool lastNote;
 
   @override
   void initState() {
@@ -218,87 +216,131 @@ class _NotlarState extends State<Notlar> {
   // build o ekrana her geldiğinde çalışır
   Widget build(BuildContext context) {
     SizeConfig().init(context);
-    return Column(
-      children: [
-        Container(
-          height: SizeConfig.blockSizeVertical * 8,
-          margin: EdgeInsets.symmetric(vertical: 7, horizontal: 16),
-          padding: EdgeInsets.symmetric(horizontal: 12),
-          decoration: BoxDecoration(
-              color: greyColor,
-              shape: BoxShape.rectangle,
-              borderRadius: BorderRadius.circular(8),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black38,
-                  offset: Offset(0.0, 1.0),
-                  blurRadius: 6,
-                )
-              ]),
-          child: TextField(
-            decoration: InputDecoration(
-              suffixIcon: Icon(Icons.search,color: Color(0x66ffffff)),
-                hintText: "Notlarda arayın",
-                hintStyle: body2,
-                focusedBorder: InputBorder.none,
-                enabledBorder: InputBorder.none,
-                disabledBorder: InputBorder.none,
-                prefixStyle: body2),
-          ),
-        ),
-        Expanded(
-          child: FutureBuilder(
-            future: databaseHelper.notListesiGetir(),
-            builder: (context, AsyncSnapshot<List<Not>> snapShot) {
-              if (snapShot.connectionState == ConnectionState.done) {
-                tumNotlar = snapShot.data;
-                sleep(Duration(microseconds: 1000));
-                return ListView.builder(
-                    itemCount: tumNotlar.length,
-                    itemBuilder: (context, index) {
-                      return ClipRRect(
-                        borderRadius: BorderRadius.circular(5.0),
-                        child: Container(
-                          padding: EdgeInsets.symmetric(horizontal: SizeConfig.blockSizeHorizontal*5),
-                          height: SizeConfig.blockSizeVertical * 20,
-                          margin:
-                              EdgeInsets.symmetric(vertical: 5, horizontal: 12),
-                          decoration: BoxDecoration(
-                              color: greyColor,
-                              shape: BoxShape.rectangle,
-                              borderRadius: BorderRadius.circular(8),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black38,
-                                  offset: Offset(0.0, 1.0),
-                                  blurRadius: 6,
-                                )
-                              ]),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                tumNotlar[index].notBaslik,
-                                style: h2Text,
+    return FutureBuilder(
+      future: databaseHelper.notListesiGetir(),
+      builder: (context, AsyncSnapshot<List<Not>> snapShot) {
+        if (snapShot.connectionState == ConnectionState.done) {
+          tumNotlar = snapShot.data;
+          if (tumNotlar.length % 2 == 0) {
+            lastNote = true;
+          } else {
+            lastNote = false;
+          }
+          sleep(Duration(microseconds: 1000));
+          return ListView.builder(
+              itemCount: tumNotlar.length,
+              itemBuilder: (context, index) {
+                return Padding(
+                  padding:
+                      EdgeInsets.symmetric(horizontal: 15.0, vertical: 8.0),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        flex: 2,
+                        child: Column(
+                          children: [
+                            Container(
+                              padding: EdgeInsets.all(10),
+                              decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(10),
+                                  boxShadow: [
+                                    BoxShadow(
+                                        color:
+                                            Color.fromRGBO(143, 148, 251, .2),
+                                        blurRadius: 20.0,
+                                        offset: Offset(0, 10))
+                                  ]),
+                              child: Column(
+                                children: <Widget>[
+                                  Container(
+                                    child: Center(
+                                      child: Text(tumNotlar[index].notBaslik,
+                                          style: titleStyle),
+                                    ),
+                                    decoration: BoxDecoration(
+                                      // borderRadius: BorderRadius.only(
+                                      //     topLeft: Radius.circular(8),
+                                      //     topRight: Radius.circular(8),
+                                      //     bottomLeft: Radius.circular(8),
+                                      //     bottomRight: Radius.circular(8)),
+                                      border: Border(
+                                        bottom: BorderSide(
+                                          color: Colors.grey[100],
+                                        ),
+                                        top: BorderSide(
+                                          color: Colors.grey[100],
+                                        ),
+                                      ),
+                                    ),
+                                    width: SizeConfig.blockSizeHorizontal * 100,
+                                    height: SizeConfig.blockSizeVertical * 6,
+                                  ),
+                                  Container(
+                                    padding: EdgeInsets.all(15),
+                                    child: Text(
+                                      tumNotlar[index].notIcerik,
+                                      style: GoogleFonts.roboto(
+                                          color: Colors.black45, fontSize: 14),
+                                    ),
+                                    width: SizeConfig.screenWidth,
+                                    height: SizeConfig.blockSizeVertical * 19,
+                                  ),
+                                ],
                               ),
-                              Text(
-                                tumNotlar[index].notIcerik,
-                                style: body2,
-                              ),
-                            ],
-                          ),
+                            )
+                          ],
                         ),
-                      );
-                    });
-              } else {
-                return Center(
-                  child: Text("Yükleniyor..."),
+                      ),
+                    ],
+                  ),
                 );
-              }
-            },
-          ),
-        ),
-      ],
+
+                /*ClipRRect(
+                  borderRadius: BorderRadius.circular(5.0),
+                  child: Container(
+                    padding: EdgeInsets.all(8.0),
+                    height: SizeConfig.blockSizeVertical * 20,
+                    width: SizeConfig.blockSizeHorizontal * 40,
+                    margin:
+                        EdgeInsets.symmetric(vertical: 5, horizontal: 12),
+                    decoration: BoxDecoration(
+                      border: Border(
+                        bottom: BorderSide(
+                            color: Colors.grey[100])
+                      ),
+                        color: greyColor,
+                        shape: BoxShape.rectangle,
+                        borderRadius: BorderRadius.circular(8),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black38,
+                            offset: Offset(0.0, 1.0),
+                            blurRadius: 6,
+                          )
+                        ]),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          tumNotlar[index].notBaslik,
+                          style: h2Text,
+                        ),
+                        Text(
+                          tumNotlar[index].notIcerik,
+                          style: body2,
+                        ),
+                      ],
+                    ),
+                  ),
+                );*/
+              });
+        } else {
+          return Center(
+            child: Text("Yükleniyor..."),
+          );
+        }
+      },
     );
   }
 
@@ -386,7 +428,7 @@ class _NotlarState extends State<Notlar> {
   //                         ],
   //                       )
 
-  _detaySayfasinaGit(BuildContext context, Not not) {
+  /*_detaySayfasinaGit(BuildContext context, Not not) {
     Navigator.push(
         context,
         MaterialPageRoute(
@@ -394,7 +436,7 @@ class _NotlarState extends State<Notlar> {
                   baslik: "Notu Düzenle",
                   duzenlenecekNot: not,
                 ))).then((value) => setState(() {}));
-  }
+  }*/
 
   _oncelikIconuAta(int notOncelik) {
     switch (notOncelik) {

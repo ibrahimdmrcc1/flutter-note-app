@@ -26,9 +26,7 @@ class _KategorilerState extends State<Kategoriler> {
     }
 
     return Scaffold(
-        appBar: AppBar(
-          title: Text("Kategoriler"),
-        ),
+
         body: ListView.builder(
             itemCount: tumKategoriler.length,
             itemBuilder: (context, index) {
